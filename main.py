@@ -40,15 +40,23 @@ bullet_ready_or_not = "ready"
 font_for_score_and_stage = pygame.font.Font('freesansbold.ttf', 32)
 game_over_font = pygame.font.Font('freesansbold.ttf', 64)
 new_game_font = pygame.font.Font('freesansbold.ttf', 50)
-
+ufo_touch_the_border = False
 buttonX_new_game = 0
 buttonY_new_game = screen_y - 100
 fontX_score = 10
 fontY_score = 10
+fontX_lives = 10
+fontY_lives = 50
 fontX_stage = 650
 fontY_stage = 0
+lives = 3
 text_for_new_game = font_for_score_and_stage.render('New Game', True, (255, 0, 0))
 distance_for_game_over = math.sqrt((math.pow(ufoX[i] - spaceshipX, 2)) + (math.pow(ufoY[i] - spaceshipY, 2)))
+
+
+def show_font_lives(x, y):
+    font_lives = font_for_score_and_stage.render("lives: " + str(lives), True, (255, 0, 0))
+    screen.blit(font_lives, (x, y))
 
 
 def show_font_game_over(x, y):
@@ -103,6 +111,8 @@ last_keydown = ''
 while running:
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
+    if lives <= 0:
+        set_running = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -149,15 +159,12 @@ while running:
         if ufoY[i] >= 470:
             for j in range(num_of_ufos):
                 ufoY[j] = 2000
-            game_over_text()
             set_running = False
-
+            ufo_touch_the_border = True
+            lives = 3
         if collision_for_game_over(ufoX[i], ufoY[i], spaceshipX, spaceshipY):
-            for j in range(num_of_ufos):
-                ufoY[j] = 2000
-            game_over_text()
+            lives = lives - 1
             set_running = False
-
         if ufoX[i] <= 0:
             ufoY[i] += ufo_changeY[i]
             ufo_changeX[i] = 0.2
@@ -217,6 +224,7 @@ while running:
     if bulletY <= 0:
         bulletY = spaceshipY
         bullet_ready_or_not = "ready"
+    show_font_lives(fontX_lives, fontY_lives)
     spaceship(spaceshipX, spaceshipY)
     show_font_score(fontX_score, fontY_score)
     show_font_stage(fontX_stage, fontY_stage)
@@ -226,12 +234,14 @@ while running:
         spaceship(spaceshipX, spaceshipY)
         show_font_score(fontX_score, fontY_score)
         show_font_stage(fontX_stage, fontY_stage)
-        show_font_game_over(buttonX_new_game, buttonY_new_game)
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 set_running = True
                 running = False
+        if lives <= 0 or ufo_touch_the_border:
+            game_over_text()
+            show_font_game_over(buttonX_new_game, buttonY_new_game)
             if event.type == pygame.KEYDOWN:
                 if pygame.key.get_pressed():
                     num_of_ufos = 6
@@ -248,7 +258,7 @@ while running:
                         ufo_changeX.append(0.3)
                         ufo_changeY.append(60)
                         ufoImg.append(pygame.image.load('Images/ufo.png'))
-
+                    lives = 3
                     spaceshipX = 370
                     spaceshipY = 480
                     spaceship_changeY = 0
@@ -259,3 +269,31 @@ while running:
                     bulletY_change = 0.7
                     bullet_ready_or_not = "ready"
                     set_running = True
+
+        else:
+            num_of_ufos = 6
+            ufoX = []
+            ufoY = []
+            ufo_changeX = []
+            ufo_changeY = []
+            ufoImg = []
+            score_value = 0
+            stage = 1
+            for _ in range(num_of_ufos):
+                ufoX.append(random.randint(0, 736))
+                ufoY.append(random.randint(0, 60))
+                ufo_changeX.append(0.3)
+                ufo_changeY.append(60)
+                ufoImg.append(pygame.image.load('Images/ufo.png'))
+
+
+            spaceshipX = 370
+            spaceshipY = 480
+            spaceship_changeY = 0
+            spaceship_changeX = 0
+            bulletX = 0
+            bulletY = spaceshipY
+            bulletX_change = 0
+            bulletY_change = 0.7
+            bullet_ready_or_not = "ready"
+            set_running = True
